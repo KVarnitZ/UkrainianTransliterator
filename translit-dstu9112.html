@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Транслітератор ДСТУ 9112:2021</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #F4D03F 0%, #F39C12 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            transition: background 0.3s ease;
+        }
+
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        body.dark-theme .main-card {
+            background: #0f3460;
+        }
+
+        body.dark-theme .input-section,
+        body.dark-theme .output-section {
+            background: #0f3460;
+        }
+
+        body.dark-theme textarea,
+        body.dark-theme .output-text {
+            color: #e4e4e4;
+            background: #0f3460;
+        }
+
+        body.dark-theme .section-title {
+            color: #e4e4e4;
+        }
+
+        body.dark-theme .char-count {
+            color: #b8b8b8;
+        }
+
+        body.dark-theme .section-header {
+            border-bottom: 2px solid #1a1a2e;
+        }
+
+        body.dark-theme .translation-area {
+            background: #1a1a2e;
+        }
+
+        body.dark-theme .controls {
+            background: #1a1a2e;
+        }
+
+        body.dark-theme .btn-secondary {
+            background: #16213e;
+            color: #e4e4e4;
+        }
+
+        body.dark-theme .btn-secondary:hover {
+            background: #1a1a2e;
+        }
+
+        body.dark-theme textarea::placeholder {
+            color: #888;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .translation-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: #e0e0e0;
+        }
+
+        .input-section, .output-section {
+            background: white;
+            padding: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .char-count {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            border: none;
+            resize: none;
+            font-size: 1em;
+            line-height: 1.6;
+            color: #333;
+            font-family: inherit;
+            overflow: hidden;
+        }
+
+        textarea:focus {
+            outline: none;
+        }
+
+        .output-text {
+            overflow-y: auto;
+            font-size: 1em;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            position: relative;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            right: 20px;
+            background: transparent;
+            border: 2px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-theme .theme-toggle {
+            border-color: #555;
+        }
+
+        .lang-toggle {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: transparent;
+            border: 2px solid #ddd;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+
+        .lang-toggle:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-theme .lang-toggle {
+            border-color: #555;
+            color: #e4e4e4;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .copy-notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+
+        .copy-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .translation-area {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="mainTitle">🇺🇦 Transliterator</h1>
+            <div class="subtitle" id="subtitle">DSTU 9112:2021 — Ukraïnsjka latynycja</div>
+        </header>
+
+        <div class="main-card">
+            <div class="translation-area">
+                <div class="input-section">
+                    <div class="section-header">
+                        <span class="section-title" id="inputTitle">Kyrylycja</span>
+                        <span class="char-count" id="inputCount">0 symvoliv</span>
+                    </div>
+                    <textarea 
+                        id="leftText" 
+                        placeholder="Vveditj tekst ukraïnsjkoju movoju..."
+                        spellcheck="false"
+                    ></textarea>
+                </div>
+
+                <div class="output-section">
+                    <div class="section-header">
+                        <span class="section-title" id="outputTitle">Latynycja</span>
+                        <span class="char-count" id="outputCount">0 symvoliv</span>
+                    </div>
+                    <textarea 
+                        id="rightText" 
+                        placeholder=""
+                        spellcheck="false"
+                    ></textarea>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="lang-toggle" onclick="toggleLanguage()" title="Перемкнути мову інтерфейсу">
+                    <span id="langIcon">CYR</span>
+                </button>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Перемкнути тему">
+                    <span id="themeIcon">🌙</span>
+                </button>
+                <button class="btn-secondary" id="copyBtn" onclick="copyToClipboard()" disabled>
+                    <span>📋</span>
+                    <span id="copyBtnText">Kopijuvaty</span>
+                </button>
+                <button class="btn-secondary" onclick="clearAll()">
+                    <span>🗑️</span>
+                    <span id="clearBtnText">Očystyty</span>
+                </button>
+            </div>
+        </div>
+
+        <footer>
+            <p id="footerText">Svjata porobka dlja Narodu</p>
+            <p style="margin-top: 5px; font-size: 0.9em; opacity: 0.6;">by KVarnitZ</p>
+        </footer>
+    </div>
+
+    <div class="copy-notification" id="copyNotification">
+        ✓ <span id="copyNotifText">Skopijovano!</span>
+    </div>
+
+    <script>
+
+        const SINGLE_CHAR_MAP = {
+            'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'Ğ', 'Ґ': 'G', 'Д': 'D',
+            'Е': 'E', 'Ж': 'Ž', 'З': 'Z', 'И': 'Y', 'І': 'I', 'Ї': 'Ï',
+            'К': 'K', 'Л': 'L', 'М': 'M', 'Н': 'N', 'О': 'O', 'П': 'P',
+            'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U', 'Ф': 'F', 'Х': 'X',
+            'Ц': 'C', 'Ч': 'Č', 'Ш': 'Š', 'Щ': 'Ŝ', 'Ь': 'J', 'Й': 'J',
+            'а': 'a', 'б': 'b', 'в': 'v', 'г': 'ğ', 'ґ': 'g', 'д': 'd',
+            'е': 'e', 'ж': 'ž', 'з': 'z', 'и': 'y', 'і': 'i', 'ї': 'ï',
+            'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p',
+            'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'x',
+            'ц': 'c', 'ч': 'č', 'ш': 'š', 'щ': 'ŝ', 'ь': 'j', 'й': 'j'
+        };
+
+        const SEQUENCE_MAP = {
+            'є': 'je', 'ю': 'ju', 'я': 'ja',
+            'Є': 'je', 'Ю': 'ju', 'Я': 'ja'
+        };
+
+        function isAlphabetic(char) {
+            return /\p{L}/u.test(char);
+        }
+
+        function normalizeChar(char) {
+            return char.toLowerCase();
+        }
+
+        function isWordAllUppercase(word) {
+            const letters = word.chars.filter(c => isAlphabetic(c));
+            if (letters.length === 0 || letters.length === 1) return false;
+            
+            const hasUppercase = letters.some(c => c === c.toUpperCase() && c !== c.toLowerCase());
+            const hasLowercase = letters.some(c => c === c.toLowerCase() && c !== c.toUpperCase());
+            
+            return hasUppercase && !hasLowercase;
+        }
+
+        function shouldForceUppercaseSingleChar(words, index) {
+            const word = words[index];
+            const letters = word.chars.filter(c => isAlphabetic(c));
+            
+            if (letters.length !== 1 || letters[0] !== letters[0].toUpperCase()) {
+                return false;
+            }
+
+            const contextWords = [];
+            
+            let leftCount = 0;
+            for (let i = index - 1; i >= 0 && leftCount < 2; i--) {
+                if (words[i].chars.length > 0) {
+                    contextWords.push(words[i]);
+                    leftCount++;
+                }
+            }
+            
+            let rightCount = 0;
+            for (let i = index + 1; i < words.length && rightCount < 3; i++) {
+                if (words[i].chars.length > 0) {
+                    contextWords.push(words[i]);
+                    rightCount++;
+                }
+            }
+            
+            if (contextWords.length === 0) return false;
+            
+            let uppercaseCount = 0;
+            let totalCount = 0;
+            
+            for (const ctxWord of contextWords) {
+                const ctxLetters = ctxWord.chars.filter(c => isAlphabetic(c));
+                if (ctxLetters.length > 1) {
+                    totalCount++;
+                    if (isWordAllUppercase(ctxWord)) {
+                        uppercaseCount++;
+                    }
+                }
+            }
+            
+            return totalCount >= 2 && uppercaseCount >= 2 && uppercaseCount / totalCount >= 0.5;
+        }
+
+        function transliterateChar(char, forceUpper, prevChar) {
+            if (SINGLE_CHAR_MAP[char]) {
+                return SINGLE_CHAR_MAP[char];
+            } else if (SEQUENCE_MAP[char]) {
+                const baseSequence = SEQUENCE_MAP[char];
+                const isUpper = char === char.toUpperCase();
+                
+                const skipConsonant = prevChar && normalizeChar(prevChar) === normalizeChar(char);
+                
+                const result = skipConsonant ? baseSequence.slice(1) : baseSequence;
+                
+                if (forceUpper) {
+                    return result.toUpperCase();
+                } else if (isUpper) {
+                    return result.charAt(0).toUpperCase() + result.slice(1);
+                } else {
+                    return result;
+                }
+            }
+            return char;
+        }
+
+        let lastActive = 'left';
+        
+        function transliterateFromLeft() {
+            const inputText = document.getElementById('leftText').value;
+            lastActive = 'left';
+            
+            if (!inputText) {
+                document.getElementById('rightText').value = '';
+                document.getElementById('copyBtn').disabled = true;
+                updateCharCount('output', 0);
+                return;
+            }
+        
+            const result = forwardTransliterate(inputText);
+            document.getElementById('rightText').value = result;
+            document.getElementById('copyBtn').disabled = false;
+            updateCharCount('output', result.length);
+        }
+        
+        function transliterateFromRight() {
+            const inputText = document.getElementById('rightText').value;
+            lastActive = 'right';
+            
+            if (!inputText) {
+                document.getElementById('leftText').value = '';
+                document.getElementById('copyBtn').disabled = true;
+                updateCharCount('input', 0);
+                return;
+            }
+
+            const result = reverseTransliterate(inputText);
+            document.getElementById('leftText').value = result;
+            document.getElementById('copyBtn').disabled = false;
+            updateCharCount('input', result.length);
+        }
+
+        function forwardTransliterate(text) {
+    let result = '';
+    let currentSentence = '';
+    
+    for (const char of text) {
+        currentSentence += char;
+        
+        if (char === '.' || char === '?' || char === '!' || char === '\n') {
+            result += transliterateSentence(currentSentence);
+            currentSentence = '';
+        }
+    }
+    
+    if (currentSentence) {
+        result += transliterateSentence(currentSentence);
+    }
+    
+    return result;
+}
+
+function transliterateSentence(text) {
+    const words = [];
+    let currentWord = '';
+    let wordChars = [];
+
+    for (const char of text) {
+        if (isAlphabetic(char)) {
+            currentWord += char;
+            wordChars.push(char);
+        } else {
+            if (currentWord) {
+                words.push({ text: currentWord, chars: wordChars });
+                currentWord = '';
+                wordChars = [];
+            }
+            words.push({ text: char, chars: [] });
+        }
+    }
+
+    if (currentWord) {
+        words.push({ text: currentWord, chars: wordChars });
+    }
+
+    let result = '';
+    
+    for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        if (word.chars.length === 0) {
+            result += word.text;
+        } else {
+            const isAllUpper = isWordAllUppercase(word);
+            const forceUpper = isAllUpper || shouldForceUppercaseSingleChar(words, i);
+            
+            let prevChar = null;
+            for (const char of word.chars) {
+                result += transliterateChar(char, forceUpper, prevChar);
+                prevChar = char;
+            }
+        }
+    }
+
+    return result;
+}
+
+        function reverseTransliterate(text) {
+            const REVERSE_SINGLE_MAP = {
+                'A': 'А', 'B': 'Б', 'V': 'В', 'Ğ': 'Г', 'G': 'Ґ', 'D': 'Д',
+                'E': 'Е', 'Ž': 'Ж', 'Z': 'З', 'Y': 'И', 'I': 'І', 'Ï': 'Ї',
+                'K': 'К', 'L': 'Л', 'M': 'М', 'N': 'Н', 'O': 'О', 'P': 'П',
+                'R': 'Р', 'S': 'С', 'T': 'Т', 'U': 'У', 'F': 'Ф', 'X': 'Х',
+                'C': 'Ц', 'Č': 'Ч', 'Š': 'Ш', 'Ŝ': 'Щ', 'J': 'Й',
+                'a': 'а', 'b': 'б', 'v': 'в', 'ğ': 'г', 'g': 'ґ', 'd': 'д',
+                'e': 'е', 'ž': 'ж', 'z': 'з', 'y': 'и', 'i': 'і', 'ï': 'ї',
+                'k': 'к', 'l': 'л', 'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п',
+                'r': 'р', 's': 'с', 't': 'т', 'u': 'у', 'f': 'ф', 'x': 'х',
+                'c': 'ц', 'č': 'ч', 'š': 'ш', 'ŝ': 'щ', 'j': 'й'
+            };
+
+            const REVERSE_SEQUENCE_MAP = [
+                ['ja', 'я'], ['Ja', 'Я'], ['JA', 'Я'],
+                ['je', 'є'], ['Je', 'Є'], ['JE', 'Є'],
+                ['ju', 'ю'], ['Ju', 'Ю'], ['JU', 'Ю']
+            ];
+
+            function isVowel(c) {
+                return /[aeiouyï]/i.test(c);
+            }
+
+            function isConsonant(c) {
+                return /[a-z]/i.test(c) && !isVowel(c);
+            }
+
+            function isSibilant(c) {
+                return /[cčšŝžzs]/i.test(c);
+            }
+
+            let result = '';
+            const chars = Array.from(text);
+            let i = 0;
+            
+            while (i < chars.length) {
+                let matched = false;
+                
+                if (i + 2 < chars.length) {
+                    const three = chars[i] + chars[i+1] + chars[i+2];
+                    if (three === 'tsj') {
+                        result += 'тьс';
+                        i += 3;
+                        matched = true;
+                    }
+                }
+                
+                if (!matched && i + 1 < chars.length) {
+                    const two = chars[i] + chars[i+1];
+                    
+                    for (const [pattern, cyrillic] of REVERSE_SEQUENCE_MAP) {
+                        if (two === pattern) {
+                            result += cyrillic;
+                            i += 2;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!matched && REVERSE_SINGLE_MAP[two]) {
+                        result += REVERSE_SINGLE_MAP[two];
+                        i += 2;
+                        matched = true;
+                    }
+                }
+
+            if (!matched) {
+                const c = chars[i];
+                
+                if (c === 'j' || c === 'J') {
+                    const prev = i > 0 ? chars[i-1] : null;
+                    const next = i + 1 < chars.length ? chars[i+1] : null;
+                    
+                    const afterSibilant = prev && isSibilant(prev);
+                    const beforeVowel = next && isVowel(next);
+                    
+                    if (afterSibilant && beforeVowel) {
+                        result += c === 'J' ? 'Ь' : 'ь';
+                        i += 1;
+                        matched = true;
+                    } else {
+                        const afterConsonant = prev && isConsonant(prev);
+                        const beforeConsonantOrEnd = !next || isConsonant(next) || !/[a-z]/i.test(next);
+                        
+                        if (afterConsonant && beforeConsonantOrEnd) {
+                            result += c === 'J' ? 'Ь' : 'ь';
+                        } else {
+                            result += c === 'J' ? 'Й' : 'й';
+                        }
+                        i += 1;
+                        matched = true;
+                    }
+                } else if (REVERSE_SINGLE_MAP[c]) {
+                    result += REVERSE_SINGLE_MAP[c];
+                    i += 1;
+                    matched = true;
+                }
+            }
+                
+                if (!matched) {
+                    result += chars[i];
+                    i += 1;
+                }
+            }
+            
+            return result;
+        }
+
+        function copyToClipboard() {
+            const text = lastActive === 'left' 
+                ? document.getElementById('rightText').value 
+                : document.getElementById('leftText').value;
+            navigator.clipboard.writeText(text).then(() => {
+                const notification = document.getElementById('copyNotification');
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 2000);
+            });
+        }
+
+        function clearAll() {
+            document.getElementById('leftText').value = '';
+            document.getElementById('rightText').value = '';
+            document.getElementById('copyBtn').disabled = true;
+            updateCharCount('input', 0);
+            updateCharCount('output', 0);
+        }
+
+        function updateCharCount(type, count) {
+            const element = document.getElementById(`${type}Count`);
+            const lang = localStorage.getItem('language') || 'lat';
+            
+            let word;
+            if (lang === 'cyr') {
+                word = count === 1 ? 'символ' : (count < 5 ? 'символи' : 'символів');
+            } else {
+                word = count === 1 ? 'symvol' : (count < 5 ? 'symvoly' : 'symvoliv');
+            }
+            element.textContent = `${count} ${word}`;
+        }
+
+        const leftTextarea = document.getElementById('leftText');
+        const rightTextarea = document.getElementById('rightText');
+        
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+        
+        leftTextarea.addEventListener('input', (e) => {
+            updateCharCount('input', e.target.value.length);
+            transliterateFromLeft();
+            autoResize(leftTextarea);
+            rightTextarea.style.height = leftTextarea.style.height;
+        });
+        
+        rightTextarea.addEventListener('input', (e) => {
+            updateCharCount('output', e.target.value.length);
+            transliterateFromRight();
+            autoResize(rightTextarea);
+            leftTextarea.style.height = rightTextarea.style.height;
+        });
+
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            const isDark = body.classList.toggle('dark-theme');
+            
+            themeIcon.textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        function toggleLanguage() {
+            const current = localStorage.getItem("language");
+            const next = current === "lat" ? "cyr" : "lat";
+        
+            localStorage.setItem("language", next);
+            updateUILanguage(next);
+        }
+
+        function updateUILanguage(lang) {
+            const langIcon = document.getElementById('langIcon');
+            const mainTitle = document.getElementById('mainTitle');
+            const subtitle = document.getElementById('subtitle');
+            const inputTitle = document.getElementById('inputTitle');
+            const outputTitle = document.getElementById('outputTitle');
+            const copyBtnText = document.getElementById('copyBtnText');
+            const clearBtnText = document.getElementById('clearBtnText');
+            const copyNotifText = document.getElementById('copyNotifText');
+            const leftText = document.getElementById('leftText');
+            const rightText = document.getElementById('rightText');
+            const footerText = document.getElementById('footerText');
+            
+            if (lang === 'cyr') {
+                langIcon.textContent = 'LAT';
+                mainTitle.textContent = '🇺🇦 Транслітератор';
+                subtitle.textContent = 'ДСТУ 9112:2021 — Українська латиниця';
+                copyBtnText.textContent = 'Копіювати';
+                clearBtnText.textContent = 'Очистити';
+                copyNotifText.textContent = 'Скопійовано!';
+                leftText.placeholder = 'Введіть кириличний текст українською мовою...';
+                rightText.placeholder = 'Введіть латинський текст українською мовою...';
+                footerText.textContent = 'Свята поробка для Народу';
+                inputTitle.textContent = 'Кирилиця';
+                outputTitle.textContent = 'Латиниця';
+                
+            } else {
+                langIcon.textContent = 'CYR';
+                mainTitle.textContent = '🇺🇦 Transliterator';
+                subtitle.textContent = 'DSTU 9112:2021 — Ukraïnsjka latynycja';
+                copyBtnText.textContent = 'Kopijuvaty';
+                clearBtnText.textContent = 'Očystyty';
+                copyNotifText.textContent = 'Skopijovano!';
+                leftText.placeholder = 'Vveditj kyrylyčnyj tekst ukraïnsjkoju movoju...';
+                rightText.placeholder = 'Vveditj latynsjkyj tekst ukraïnsjkoju movoju...';
+                footerText.textContent = 'Svjata porobka dlja Narodu';
+                inputTitle.textContent = 'Kyrylycja';
+                outputTitle.textContent = 'Latynycja';
+            }
+            
+            const inputCount = document.getElementById('leftText').value.length;
+            const outputCount = document.getElementById('rightText').value.length;
+            updateCharCount('input', inputCount);
+            updateCharCount('output', outputCount);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!localStorage.getItem("language")) {
+                localStorage.setItem("language", "lat");
+            }
+        
+            const currentLang = localStorage.getItem("language");
+            updateUILanguage(currentLang);
+        });
+    </script>
+</body>
+</html>
